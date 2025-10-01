@@ -58,5 +58,13 @@ export function formatTable(result: AnalysisResult): string {
     output += '\n' + chalk.gray(`Total Gzipped: ${formatBytes(result.summary.totalGzipped)}`);
     output += '\n' + chalk.gray(`Analysis Duration: ${(result.summary.duration / 1000).toFixed(2)}s`);
 
+    // Add unused dependencies
+    if (result.unusedDependencies && result.unusedDependencies.length > 0) {
+        output += '\n\n' + chalk.yellow.bold('Unused Dependencies:');
+        result.unusedDependencies.forEach((dep) => {
+            output += '\n' + chalk.yellow(`- ${dep}`);
+        });
+    }
+
     return output;
 }

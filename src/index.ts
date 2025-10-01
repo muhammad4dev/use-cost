@@ -1,4 +1,6 @@
 import ora from 'ora';
+import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
 import type { AnalysisOptions, AnalysisResult, ImportInfo, SizeInfo } from './types.js';
 import { findFiles } from './utils/file-finder.js';
 import { parseFiles } from './parser/index.js';
@@ -81,9 +83,23 @@ export async function analyzeProject(options: AnalysisOptions = {}): Promise<Ana
             duration: Date.now() - startTime,
         };
 
+        // Check for unused dependencies
+        let unusedDependencies: string[] = [];
+        try {
+            const packageJsonPath = join(cwd, 'package.json');
+            if (existsSync(packageJsonPath)) {
+                const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+                const dependencies = Object.keys(packageJson.dependencies || {});
+                unusedDependencies = dependencies.filter((dep) => !packageNames.has(dep));
+            }
+        } catch (error) {
+            // Ignore error if package.json cannot be read
+        }
+
         return {
             imports: results,
             summary,
+            unusedDependencies,
         };
     } catch (error) {
         spinner?.fail('Analysis failed');

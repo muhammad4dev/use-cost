@@ -11,6 +11,7 @@ A fast, modern CLI tool that analyzes your project's imports and calculates thei
 - 📊 **Multiple Output Formats** - Table, JSON, and HTML reports
 - 💾 **Smart Caching** - Caches results to speed up subsequent analyses
 - 🌳 **Tree-Shaking Aware** - Calculates actual bundle sizes with tree-shaking
+- 🧹 **Unused Dependencies** - Detects dependencies installed but not used in your code
 - 🎨 **Beautiful CLI** - Color-coded output with progress indicators
 
 ## Installation

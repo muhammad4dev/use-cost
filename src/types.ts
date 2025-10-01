@@ -52,6 +52,8 @@ export interface AnalysisResult {
         /** Analysis duration in milliseconds */
         duration: number;
     };
+    /** List of dependencies defined in package.json but not imported */
+    unusedDependencies?: string[];
 }
 
 /**
