@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
+import { dirname } from 'path';
 
 export interface PackageInfo {
     name: string;

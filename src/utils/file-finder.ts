@@ -1,6 +1,5 @@
 import fg from 'fast-glob';
 import { readFileSync } from 'fs';
-import { join } from 'path';
 
 /**
  * Default file patterns to exclude
