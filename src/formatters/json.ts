@@ -11,6 +11,7 @@ export function formatJson(result: AnalysisResult): string {
             platform: process.platform,
         },
         summary: result.summary,
+        unusedDependencies: result.unusedDependencies,
         imports: result.imports.map((sizeInfo) => ({
             package: sizeInfo.import.source,
             specifiers: sizeInfo.import.specifiers,
