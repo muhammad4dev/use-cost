@@ -35,11 +35,18 @@ function extractSvelteScript(content: string): string {
         const ast = svelteParse(content);
         const scripts: string[] = [];
 
+        interface NodeWithLocation {
+            start: number;
+            end: number;
+        }
+
         if (ast.instance) {
-            scripts.push(content.substring(ast.instance.content.start, ast.instance.content.end));
+            const instanceContent = ast.instance.content as unknown as NodeWithLocation;
+            scripts.push(content.substring(instanceContent.start, instanceContent.end));
         }
         if (ast.module) {
-            scripts.push(content.substring(ast.module.content.start, ast.module.content.end));
+            const moduleContent = ast.module.content as unknown as NodeWithLocation;
+            scripts.push(content.substring(moduleContent.start, moduleContent.end));
         }
 
         return scripts.join('\n');
