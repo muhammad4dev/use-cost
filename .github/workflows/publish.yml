@@ -30,5 +30,7 @@ jobs:
       - name: Update npm
         run: npm install -g npm@latest
       - run: npm install
-      - run: npm run prepublishOnly
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build
       - run: npm publish
