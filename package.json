@@ -1,6 +1,6 @@
 {
     "name": "use-cost",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Analyze JavaScript/TypeScript imports and display bundle size reports",
     "repository": {
         "type": "git",
