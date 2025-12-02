@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      level:
+        description: "Version bump level"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prerelease
+      preid:
+        description: "Pre-release identifier (e.g., beta, rc)"
+        required: false
+        type: string
+      custom_version:
+        description: "Custom version (overrides level)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version
+        id: bump
+        run: |
+          if [ -n "${{ inputs.custom_version }}" ]; then
+            npm version "${{ inputs.custom_version }}" -m "chore: release v%s"
+          elif [ -n "${{ inputs.preid }}" ]; then
+            npm version ${{ inputs.level }} --preid="${{ inputs.preid }}" -m "chore: release v%s"
+          else
+            npm version ${{ inputs.level }} -m "chore: release v%s"
+          fi
+          echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Push changes
+        run: git push --follow-tags
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.bump.outputs.version }}
+          generate_release_notes: true
+
+  publish:
+    needs: release
+    uses: ./.github/workflows/publish.yml
+    with:
+      ref: v${{ needs.release.outputs.version }}
+    secrets: inherit
