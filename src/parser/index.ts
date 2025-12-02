@@ -4,6 +4,7 @@ import { parse as svelteParse } from 'svelte/compiler';
 import type { ImportInfo } from '../types.js';
 import { readFileContent } from '../utils/file-finder.js';
 import { isLocalPackage } from '../utils/package-resolver.js';
+import type { AliasConfig } from '../utils/alias-resolver.js';
 
 /**
  * Extract script content from Vue SFC
@@ -59,7 +60,11 @@ function extractSvelteScript(content: string): string {
 /**
  * Parse JavaScript/TypeScript code and extract imports
  */
-function parseJavaScript(code: string, filePath: string): ImportInfo[] {
+function parseJavaScript(
+  code: string,
+  filePath: string,
+  aliasConfig?: AliasConfig | null
+): ImportInfo[] {
   const imports: ImportInfo[] = [];
 
   try {
@@ -73,8 +78,8 @@ function parseJavaScript(code: string, filePath: string): ImportInfo[] {
       if (node.type === 'ImportDeclaration') {
         const source = node.source.value;
 
-        // Skip local imports
-        if (isLocalPackage(source)) return;
+        // Skip local imports (including aliases)
+        if (isLocalPackage(source, aliasConfig)) return;
 
         const specifiers: string[] = [];
         node.specifiers.forEach((spec) => {
@@ -111,8 +116,8 @@ function parseJavaScript(code: string, filePath: string): ImportInfo[] {
           ) {
             const source = decl.init.arguments[0].value;
 
-            // Skip local imports
-            if (isLocalPackage(source)) return;
+            // Skip local imports (including aliases)
+            if (isLocalPackage(source, aliasConfig)) return;
 
             imports.push({
               source,
@@ -135,8 +140,8 @@ function parseJavaScript(code: string, filePath: string): ImportInfo[] {
       ) {
         const source = node.expression.arguments[0].value;
 
-        // Skip local imports
-        if (isLocalPackage(source)) return;
+        // Skip local imports (including aliases)
+        if (isLocalPackage(source, aliasConfig)) return;
 
         imports.push({
           source,
@@ -157,7 +162,7 @@ function parseJavaScript(code: string, filePath: string): ImportInfo[] {
 /**
  * Parse a file and extract all imports
  */
-export function parseFile(filePath: string): ImportInfo[] {
+export function parseFile(filePath: string, aliasConfig?: AliasConfig | null): ImportInfo[] {
   const content = readFileContent(filePath);
   if (!content) return [];
 
@@ -170,17 +175,20 @@ export function parseFile(filePath: string): ImportInfo[] {
     codeToAnalyze = extractSvelteScript(content);
   }
 
-  return parseJavaScript(codeToAnalyze, filePath);
+  return parseJavaScript(codeToAnalyze, filePath, aliasConfig);
 }
 
 /**
  * Parse multiple files and extract all imports
  */
-export async function parseFiles(filePaths: string[]): Promise<ImportInfo[]> {
+export async function parseFiles(
+  filePaths: string[],
+  aliasConfig?: AliasConfig | null
+): Promise<ImportInfo[]> {
   const allImports: ImportInfo[] = [];
 
   for (const filePath of filePaths) {
-    const imports = parseFile(filePath);
+    const imports = parseFile(filePath, aliasConfig);
     allImports.push(...imports);
   }
 

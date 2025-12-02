@@ -7,6 +7,7 @@ import { parseFiles } from './parser/index.js';
 import { analyzeImports } from './analyzer/index.js';
 import { Cache } from './cache/index.js';
 import { extractPackageName } from './utils/package-resolver.js';
+import { loadAliasConfig } from './utils/alias-resolver.js';
 
 /**
  * Analyze a project and return import cost information
@@ -25,13 +26,19 @@ export async function analyzeProject(options: AnalysisOptions = {}): Promise<Ana
   const spinner = progress ? ora('Finding files...').start() : null;
 
   try {
+    // Load alias configuration from tsconfig/jsconfig
+    const aliasConfig = loadAliasConfig(cwd);
+    if (aliasConfig) {
+      spinner?.info(`Loaded alias configuration with ${aliasConfig.aliases.length} aliases`);
+    }
+
     // Find all source files
     const files = await findFiles({ cwd, include, exclude });
     spinner?.succeed(`Found ${files.length} files`);
 
     // Parse imports from all files
     spinner?.start('Parsing imports...');
-    const allImports = await parseFiles(files);
+    const allImports = await parseFiles(files, aliasConfig);
 
     // Deduplicate imports by package + specifiers
     const uniqueImports = deduplicateImports(allImports);

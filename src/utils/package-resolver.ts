@@ -1,5 +1,7 @@
 import { readFileSync } from 'fs';
 import { dirname } from 'path';
+import type { AliasConfig } from './alias-resolver.js';
+import { isAliasImport } from './alias-resolver.js';
 
 export interface PackageInfo {
   name: string;
@@ -31,10 +33,19 @@ export function resolvePackage(packageName: string, fromPath: string): PackageIn
 }
 
 /**
- * Check if a package is a local dependency
+ * Check if a package is a local dependency (relative path or aliased path)
  */
-export function isLocalPackage(packageName: string): boolean {
-  return packageName.startsWith('.') || packageName.startsWith('/');
+export function isLocalPackage(
+  packageName: string,
+  aliasConfig?: AliasConfig | null
+): boolean {
+  // Check for relative or absolute paths
+  const isRelativeOrAbsolute = packageName.startsWith('.') || packageName.startsWith('/');
+
+  // Check for alias imports
+  const isAlias = aliasConfig ? isAliasImport(packageName, aliasConfig) : false;
+
+  return isRelativeOrAbsolute || isAlias;
 }
 
 /**
