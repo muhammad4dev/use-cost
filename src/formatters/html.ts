@@ -27,11 +27,7 @@ export function formatHtml(result: AnalysisResult): string {
   const rows = sorted
     .map(([packageName, sizes]) => {
       const color =
-        sizes.gzipped < 50 * 1024
-          ? '#10b981'
-          : sizes.gzipped < 200 * 1024
-            ? '#f59e0b'
-            : '#ef4444';
+        sizes.gzipped < 50 * 1024 ? '#10b981' : sizes.gzipped < 200 * 1024 ? '#f59e0b' : '#ef4444';
 
       return `
         <tr>
@@ -190,8 +186,9 @@ export function formatHtml(result: AnalysisResult): string {
       </tbody>
     </table>
 
-    ${result.unusedDependencies && result.unusedDependencies.length > 0
-      ? `
+    ${
+      result.unusedDependencies && result.unusedDependencies.length > 0
+        ? `
     <div style="padding: 2rem; background: #fef3c7; border-top: 1px solid #f59e0b;">
       <h2 style="color: #92400e; margin-bottom: 1rem; font-size: 1.25rem;">⚠️ Unused Dependencies</h2>
       <p style="color: #78350f; margin-bottom: 0.5rem;">The following dependencies are installed but not used:</p>
@@ -200,7 +197,7 @@ export function formatHtml(result: AnalysisResult): string {
       </ul>
     </div>
     `
-      : ''
+        : ''
     }
 
     <div class="footer">
